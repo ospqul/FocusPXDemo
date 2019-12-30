@@ -3,10 +3,39 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:FPXDemo.Views"
+        xmlns:local="clr-namespace:FPXDemo.Views" WindowStartupLocation="CenterScreen"
         mc:Ignorable="d"
         Title="FocusPX Demo" Height="450" Width="800">
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="20"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="20"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="20"/>
+        </Grid.RowDefinitions>
         
+        <!-- Row 1: Connect Device -->
+        <Button x:Name="ConnectDevice" Content="Connect Device" 
+                Grid.Column="1" Grid.Row="1" />
+        <StackPanel Orientation="Horizontal" Grid.Column="2" Grid.Row="1">
+            <Label Content="Serial Number" />
+            <TextBox x:Name="SerialNumber" MinWidth="50"/>
+            <Label Content="IP Address"/>
+            <TextBox x:Name="IPAddress" MinWidth="50" />
+        </StackPanel>        
     </Grid>
 </Window>

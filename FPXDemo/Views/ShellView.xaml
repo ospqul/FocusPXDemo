@@ -4,8 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FPXDemo.Views" WindowStartupLocation="CenterScreen"
+        xmlns:oxy="http://oxyplot.org/wpf"
         mc:Ignorable="d"
-        Title="FocusPX Demo" Height="450" Width="800">
+        Title="FocusPX Demo" Height="600" Width="1000">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="20"/>
@@ -62,15 +63,22 @@
             <Button x:Name="CollectAscanData" Content="Collect Ascan Data"
                     Margin="5,0"/>
         </StackPanel>
+        
+        <!-- Row 5: Plot Ascan -->
+        <Button x:Name="PlotAscan" Content="Plot Ascan"
+                Grid.Column="1" Grid.Row="5" Margin="5"/>
 
         <!-- Last Row: Logging -->
-        <Border BorderThickness="1" BorderBrush="Black"
-                Grid.Column="1" Grid.ColumnSpan="6" Grid.Row="6" Margin="10">
+        <Border BorderThickness="1" BorderBrush="Black" MaxWidth="500"
+                Grid.Column="1" Grid.ColumnSpan="5" Grid.Row="6" Margin="10">
             <ScrollViewer>
                 <TextBlock x:Name="Logging" TextWrapping="Wrap"/>
             </ScrollViewer>
         </Border>
         
-        
+        <!-- Plotting Area -->
+        <oxy:PlotView Grid.Column="6" Grid.Row="1" Grid.RowSpan="6"
+                      Model="{Binding plotModel}" Margin="10"/>
+
     </Grid>
 </Window>

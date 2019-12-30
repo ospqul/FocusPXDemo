@@ -1,5 +1,8 @@
 ﻿using Caliburn.Micro;
 using FPXDemo.Models;
+using OxyPlot;
+using OxyPlot.Axes;
+using OxyPlot.Series;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +14,8 @@ namespace FPXDemo.ViewModels
     class ShellViewModel : Screen
     {
         public DeviceModel deviceModel { get; set; }
+        public PlotModel plotModel { get; set; }
+        public LineSeries lineSeries { get; set; }
 
         private string _serialNumber;
         private string _ipAddress;
@@ -18,6 +23,36 @@ namespace FPXDemo.ViewModels
 
         private string _logging;
 
+
+        public ShellViewModel()
+        {
+            plotModel = new PlotModel
+            {
+                Title = "Ascan Plotting",
+            };
+
+            LinearAxis xAxis = new LinearAxis
+            {
+                Position = AxisPosition.Bottom,
+                MajorGridlineStyle = LineStyle.Solid,
+            };
+            plotModel.Axes.Add(xAxis);
+
+            LinearAxis yAxis = new LinearAxis
+            {
+                Position = AxisPosition.Left,
+                MajorGridlineStyle = LineStyle.Solid,
+            };
+            plotModel.Axes.Add(yAxis);
+
+            lineSeries = new LineSeries
+            {
+                Title = "Ascan Data",
+                Color = OxyColors.Blue,
+                StrokeThickness = 1.5,
+            };
+            plotModel.Series.Add(lineSeries);
+        }
 
         public void ConnectDevice()
         {
@@ -75,6 +110,21 @@ namespace FPXDemo.ViewModels
 
             Logging += Environment.NewLine;
 
+            deviceModel.acquisition.Stop();
+        }
+
+        public void PlotAscan()
+        {
+            deviceModel.acquisition.ApplyConfiguration();
+            deviceModel.acquisition.Start();
+
+            int[] ascanData = deviceModel.CollectAscanData();
+
+            for (int i = 0; i < ascanData.GetLength(0); i++)
+            {
+                lineSeries.Points.Add(new DataPoint(i, ascanData[i]));
+            }
+            plotModel.InvalidatePlot(true);
             deviceModel.acquisition.Stop();
         }
 

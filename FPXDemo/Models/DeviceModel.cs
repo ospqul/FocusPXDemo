@@ -113,5 +113,23 @@ namespace FPXDemo.Models
 
             return null;
         }
+
+        public void ConsumeData()
+        {
+            try
+            {
+                var dataResult = acquisition.WaitForDataEx();
+                while (dataResult.status == IAcquisition.WaitForDataResultEx.Status.DataAvailable)
+                {
+                    using (var cycleData = dataResult.cycleData)
+                        dataResult = acquisition.WaitForDataEx();
+                }
+                dataResult.Dispose();
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+        }
     }
 }

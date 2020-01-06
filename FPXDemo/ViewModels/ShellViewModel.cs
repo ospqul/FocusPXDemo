@@ -54,9 +54,10 @@ namespace FPXDemo.ViewModels
             plotModel.Series.Add(lineSeries);
         }
 
-        public void ConnectDevice()
+        public async void ConnectDevice()
         {
-            deviceModel = new DeviceModel();
+            //deviceModel = new DeviceModel();
+            deviceModel = await Task.Run(() => new DeviceModel());
             SerialNumber = deviceModel.device.GetInfo().GetSerialNumber();
             IPAddress = deviceModel.device.GetInfo().GetAddressIPv4();
         }
@@ -125,6 +126,46 @@ namespace FPXDemo.ViewModels
                 lineSeries.Points.Add(new DataPoint(i, ascanData[i]));
             }
             plotModel.InvalidatePlot(true);
+            deviceModel.acquisition.Stop();
+        }
+
+        public void PlottingAscan()
+        {
+            int[] ascanData;
+            int plottingIndex = 0;
+
+            while (true)
+            {
+                ascanData = deviceModel.CollectAscanData();
+                if (ascanData.GetLength(0) < 1)
+                { break; }
+
+                lineSeries.Points.Clear();
+
+                for (int i = 0; i < ascanData.GetLength(0); i++)
+                {
+                    lineSeries.Points.Add(new DataPoint(i, ascanData[i]));
+                }
+                plotModel.InvalidatePlot(true);
+                plottingIndex += 1;
+                Logging = plottingIndex.ToString();
+            }
+        }
+
+        public void StartAscan()
+        {
+            deviceModel.acquisition.ApplyConfiguration();
+            deviceModel.acquisition.Start();
+
+            var taskConsumeData = new Task(() => deviceModel.ConsumeData());
+            taskConsumeData.Start();
+
+            var taskPlottingAscan = new Task(() => PlottingAscan());
+            taskPlottingAscan.Start();
+        }
+
+        public void StopAscan()
+        {
             deviceModel.acquisition.Stop();
         }
 

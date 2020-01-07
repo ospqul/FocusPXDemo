@@ -21,6 +21,9 @@ namespace FPXDemo.ViewModels
         private string _ipAddress;
         private string _beamSetName;
 
+        private string _ascanGain;
+        private string _ascanLength;
+
         private string _logging;
 
 
@@ -60,6 +63,15 @@ namespace FPXDemo.ViewModels
             deviceModel = await Task.Run(() => new DeviceModel());
             SerialNumber = deviceModel.device.GetInfo().GetSerialNumber();
             IPAddress = deviceModel.device.GetInfo().GetAddressIPv4();
+            CreateBeamSet();
+            BindConnector();
+            InitAcquisition();
+
+            // Init Ascan Settings
+            AscanGain = deviceModel.beamSet.GetBeam(0).GetGain().ToString();
+            AscanLength = deviceModel.beamSet.GetBeam(0).GetAscanLength().ToString();
+
+            StartAscan();
         }
 
         public void CreateBeamSet()
@@ -136,19 +148,27 @@ namespace FPXDemo.ViewModels
 
             while (true)
             {
-                ascanData = deviceModel.CollectAscanData();
-                if (ascanData.GetLength(0) < 1)
-                { break; }
-
-                lineSeries.Points.Clear();
-
-                for (int i = 0; i < ascanData.GetLength(0); i++)
+                try
                 {
-                    lineSeries.Points.Add(new DataPoint(i, ascanData[i]));
+                    ascanData = deviceModel.CollectAscanData();
+                    if (ascanData.GetLength(0) < 1)
+                    { break; }
+
+                    lineSeries.Points.Clear();
+
+                    for (int i = 0; i < ascanData.GetLength(0); i++)
+                    {
+                        lineSeries.Points.Add(new DataPoint(i, ascanData[i]));
+                    }
+                    plotModel.InvalidatePlot(true);
+                    plottingIndex += 1;
+                    Logging = plottingIndex.ToString();
                 }
-                plotModel.InvalidatePlot(true);
-                plottingIndex += 1;
-                Logging = plottingIndex.ToString();
+                catch (Exception)
+                {
+
+                    //throw;
+                }
             }
         }
 
@@ -198,6 +218,38 @@ namespace FPXDemo.ViewModels
                 NotifyOfPropertyChange(() => BeamSetName);
             }
         }
+                     
+        public string AscanGain
+        {
+            get { return _ascanGain; }
+            set
+            {
+                _ascanGain = value;
+                NotifyOfPropertyChange(() => AscanGain);
+                if (double.TryParse(_ascanGain, out double result))
+                {
+                    deviceModel.beamSet.GetBeam(0).SetGainEx(result);
+                    deviceModel.acquisition.ApplyConfiguration();
+                }
+            }
+        }
+
+        public string AscanLength
+        {
+            get { return _ascanLength; }
+            set
+            {
+                _ascanLength = value;
+                NotifyOfPropertyChange(() => AscanLength);
+                if (double.TryParse(_ascanLength, out double result))
+                {
+                    deviceModel.beamSet.GetBeam(0).SetAscanLength(result);
+                    deviceModel.acquisition.ApplyConfiguration();
+                }
+            }
+        }
+
+
 
         public string Logging
         {

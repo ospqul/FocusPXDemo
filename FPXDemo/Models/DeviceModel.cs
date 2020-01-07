@@ -114,21 +114,42 @@ namespace FPXDemo.Models
             return null;
         }
 
+        //public void ConsumeData()
+        //{
+        //    try
+        //    {
+        //        var dataResult = acquisition.WaitForDataEx();
+        //        while (dataResult.status == IAcquisition.WaitForDataResultEx.Status.DataAvailable)
+        //        {
+        //            using (var cycleData = dataResult.cycleData)
+        //                dataResult = acquisition.WaitForDataEx();
+        //        }
+        //        dataResult.Dispose();
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        MessageBox.Show(e.ToString());
+        //    }
+        //}
+
         public void ConsumeData()
         {
-            try
+            while (true)
             {
-                var dataResult = acquisition.WaitForDataEx();
-                while (dataResult.status == IAcquisition.WaitForDataResultEx.Status.DataAvailable)
+                try
                 {
-                    using (var cycleData = dataResult.cycleData)
-                        dataResult = acquisition.WaitForDataEx();
+                    var dataResult = acquisition.WaitForDataEx();
+                    if (dataResult.status == IAcquisition.WaitForDataResultEx.Status.DataAvailable)
+                    {
+                        using (var cycleData = dataResult.cycleData)
+                        {
+                            dataResult = acquisition.WaitForDataEx();
+                            dataResult.Dispose();
+                        }
+                    }                    
                 }
-                dataResult.Dispose();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.ToString());
+                catch
+                { }
             }
         }
     }

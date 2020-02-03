@@ -2,7 +2,7 @@
 
 OpenView SDK is designed to help create custom applications for non-destructive inspections of industrial and commercial materials.
 
-This tutorial will help you build an Focus PX application based on OpenView SDK from scratch.
+This tutorial will help you build a Focus PX application based on OpenView SDK from scratch.
 
 The source codes are available in Github: https://github.com/ospqul/FocusPXDemo/tree/master
 

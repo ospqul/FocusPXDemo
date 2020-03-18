@@ -17,6 +17,10 @@ namespace FPXDemo.ViewModels
         public PlotModel plotModel { get; set; }
         public LineSeries lineSeries { get; set; }
 
+        //Bscan Plotting
+        public HeatMapSeries heatmapSeries { get; set; }
+        public double[,] plotData = { };
+
         private string _serialNumber;
         private string _ipAddress;
         private string _beamSetName;
@@ -29,32 +33,30 @@ namespace FPXDemo.ViewModels
 
         public ShellViewModel()
         {
+            InitializeBscanGraph();
+        }
+
+        public void InitializeBscanGraph()
+        {
             plotModel = new PlotModel
             {
-                Title = "Ascan Plotting",
+                Title = "Bscan",
             };
 
-            LinearAxis xAxis = new LinearAxis
-            {
-                Position = AxisPosition.Bottom,
-                MajorGridlineStyle = LineStyle.Solid,
-            };
-            plotModel.Axes.Add(xAxis);
+            var axis = new LinearColorAxis();
+            plotModel.Axes.Add(axis);
 
-            LinearAxis yAxis = new LinearAxis
-            {
-                Position = AxisPosition.Left,
-                MajorGridlineStyle = LineStyle.Solid,
+            heatmapSeries = new HeatMapSeries
+            {                
+                X0 = 0,
+                X1 = 25,
+                Y0 = 0,
+                Y1 = 5000,
+                Interpolate = true,
+                RenderMethod = HeatMapRenderMethod.Bitmap,
+                Data = plotData,
             };
-            plotModel.Axes.Add(yAxis);
-
-            lineSeries = new LineSeries
-            {
-                Title = "Ascan Data",
-                Color = OxyColors.Blue,
-                StrokeThickness = 1.5,
-            };
-            plotModel.Series.Add(lineSeries);
+            plotModel.Series.Add(heatmapSeries);
         }
 
         public async void ConnectDevice()
@@ -63,16 +65,22 @@ namespace FPXDemo.ViewModels
             deviceModel = await Task.Run(() => new DeviceModel());
             SerialNumber = deviceModel.device.GetInfo().GetSerialNumber();
             IPAddress = deviceModel.device.GetInfo().GetAddressIPv4();
-            CreateBeamSet();
-            BindConnector();
+            //CreateBeamSet();
+            //BindConnector();
+            deviceModel.CreatePABeamSet();
+            deviceModel.BindPAConnector();
             InitAcquisition();
 
             // Init Ascan Settings
             AscanGain = deviceModel.beamSet.GetBeam(0).GetGain().ToString();
             AscanLength = deviceModel.beamSet.GetBeam(0).GetAscanLength().ToString();
 
-            StartAscan();
+            //StartAscan();
+            StartBscan();
         }
+
+
+
 
         public void CreateBeamSet()
         {
@@ -172,6 +180,40 @@ namespace FPXDemo.ViewModels
             }
         }
 
+        public void PlottingBscan()
+        {
+            int[][] bscanData;
+            double[,] plotData;
+            int plottingIndex = 0;
+            while (true)
+            {
+                try
+                {
+                    bscanData = deviceModel.CollectBscanData();
+                    if (bscanData == null)
+                    { break; }
+
+                    plotData = new double[bscanData.GetLength(0), bscanData.GetLength(1)];
+                    for (int i=0; i< bscanData.GetLength(0); i++)
+                    {
+                        for (int j=0; j<bscanData.GetLength(1); j++)
+                        {
+                            plotData[i, j] = (double)bscanData[i][j];
+                        }
+                    }
+                    plotModel.InvalidatePlot(true);
+                    heatmapSeries.Data = plotData;
+                    plottingIndex += 1;
+                    Logging = plottingIndex.ToString();
+                }
+                catch (Exception)
+                {
+
+                    //throw;
+                }
+            }
+        }
+
         public void StartAscan()
         {
             deviceModel.acquisition.ApplyConfiguration();
@@ -181,6 +223,18 @@ namespace FPXDemo.ViewModels
             taskConsumeData.Start();
 
             var taskPlottingAscan = new Task(() => PlottingAscan());
+            taskPlottingAscan.Start();
+        }
+
+        public void StartBscan()
+        {
+            deviceModel.acquisition.ApplyConfiguration();
+            deviceModel.acquisition.Start();
+
+            var taskConsumeData = new Task(() => deviceModel.ConsumeData());
+            taskConsumeData.Start();
+
+            var taskPlottingAscan = new Task(() => PlottingBscan());
             taskPlottingAscan.Start();
         }
 
@@ -228,7 +282,11 @@ namespace FPXDemo.ViewModels
                 NotifyOfPropertyChange(() => AscanGain);
                 if (double.TryParse(_ascanGain, out double result))
                 {
-                    deviceModel.beamSet.GetBeam(0).SetGainEx(result);
+                    var beamNumber = deviceModel.beamSet.GetBeamCount();
+                    for (uint beamIndex = 0; beamIndex < beamNumber; beamIndex++)
+                    {
+                        deviceModel.beamSet.GetBeam(beamIndex).SetGainEx(result);
+                    }
                     deviceModel.acquisition.ApplyConfiguration();
                 }
             }
@@ -243,14 +301,16 @@ namespace FPXDemo.ViewModels
                 NotifyOfPropertyChange(() => AscanLength);
                 if (double.TryParse(_ascanLength, out double result))
                 {
-                    deviceModel.beamSet.GetBeam(0).SetAscanLength(result);
+                    var beamNumber = deviceModel.beamSet.GetBeamCount();
+                    for (uint beamIndex = 0; beamIndex < beamNumber; beamIndex++)
+                    {
+                        deviceModel.beamSet.GetBeam(beamIndex).SetAscanLength(result);
+                    }
                     deviceModel.acquisition.ApplyConfiguration();
                 }
             }
         }
-
-
-
+               
         public string Logging
         {
             get { return _logging; }
@@ -260,8 +320,6 @@ namespace FPXDemo.ViewModels
                 NotifyOfPropertyChange(() => Logging);
             }
         }
-
-
-
+               
     }
 }

@@ -65,6 +65,44 @@ namespace FPXDemo.Models
             ultrasoundConfiguration.GetFiringBeamSetCollection().Add(beamSet, connector);
         }
 
+        public void CreatePABeamSet()
+        {
+            IDeviceConfiguration deviceConfiguration = device.GetConfiguration();
+            ultrasoundConfiguration = deviceConfiguration.GetUltrasoundConfiguration();
+            digitizerTechnology = ultrasoundConfiguration.GetDigitizerTechnology(UltrasoundTechnology.PhasedArray);
+            var beamSetFactory = digitizerTechnology.GetBeamSetFactory();
+            var beamFormations = GetBeamFormations(beamSetFactory);
+            beamSet = beamSetFactory.CreateBeamSetPhasedArray("Phased Array", beamFormations);
+        }
+
+        public IBeamFormationCollection GetBeamFormations(IBeamSetFactory beamSetFactory)
+        {
+            uint usedElementPerBeam = 8;
+            uint totalElements = 32;
+
+            var beamFormations = beamSetFactory.CreateBeamFormationCollection();
+
+            for (uint beamIndex=0; beamIndex<totalElements-usedElementPerBeam+1; beamIndex++)
+            {
+                var beamFormation = beamSetFactory.CreateBeamFormation(
+                    usedElementPerBeam,
+                    usedElementPerBeam,
+                    beamIndex + 1,
+                    beamIndex + 1);
+
+                beamFormations.Add(beamFormation);
+            }
+
+            return beamFormations;
+        }
+
+        public void BindPAConnector()
+        {
+            // Create PA connetor
+            IConnector connector = digitizerTechnology.GetConnectorCollection().GetConnector(0);
+            ultrasoundConfiguration.GetFiringBeamSetCollection().Add(beamSet, connector);
+        }
+
         public void InitiateAcquisition()
         {
             if (device == null)
@@ -114,23 +152,31 @@ namespace FPXDemo.Models
             return null;
         }
 
-        //public void ConsumeData()
-        //{
-        //    try
-        //    {
-        //        var dataResult = acquisition.WaitForDataEx();
-        //        while (dataResult.status == IAcquisition.WaitForDataResultEx.Status.DataAvailable)
-        //        {
-        //            using (var cycleData = dataResult.cycleData)
-        //                dataResult = acquisition.WaitForDataEx();
-        //        }
-        //        dataResult.Dispose();
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        MessageBox.Show(e.ToString());
-        //    }
-        //}
+        public int[][] CollectBscanData()
+        {
+            if (acquisition == null)
+            {
+                return null;
+            }
+
+            var result = acquisition.WaitForDataEx();
+            if (result.status == IAcquisition.WaitForDataResultEx.Status.DataAvailable)
+            {
+                var cycleData = result.cycleData;
+                var ascanCollection = cycleData.GetAscanCollection();
+                int[][] bscanData = new int[ascanCollection.GetCount()][];
+                for (uint index = 0; index < ascanCollection.GetCount(); index++)
+                {
+                    var ascan = ascanCollection.GetAscan(index);
+                    int[] ascandata = new int[ascan.GetSampleQuantity()];
+                    Marshal.Copy(ascan.GetData(), ascandata, 0, (int)ascan.GetSampleQuantity());
+                    bscanData[index] = ascandata;
+                }
+                return bscanData;
+            }
+
+            return null;
+        }
 
         public void ConsumeData()
         {

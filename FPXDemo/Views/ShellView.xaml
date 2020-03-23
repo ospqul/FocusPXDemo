@@ -65,14 +65,14 @@
                     Margin="5,0"/>
         </StackPanel>-->
         
-        <!-- Row 5: Plot Ascan -->
+        <!-- Row 5: Plot Ascan --><!--
         <Button x:Name="PlotAscan" Content="Plot Ascan"
                 Grid.Column="1" Grid.Row="5" Margin="5"/>
         <StackPanel Orientation="Horizontal" Grid.Column="2" Grid.Row="5"
                     Margin="5">
             <Button x:Name="StartAscan" Content="Start Ascan" Margin="5"/>
             <Button x:Name="StopAscan" Content="Stop Ascan" Margin="5"/>
-        </StackPanel>
+        </StackPanel>-->
         
         <!-- Row 6: Ascan Settings -->
         <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="6"

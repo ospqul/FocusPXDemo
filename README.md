@@ -1293,7 +1293,7 @@ public string AscanLength
 
 The indication in test block is a dot, but we only see line segment in bscan image. This is because we didn't set element delays, we were using unfocused beam. In next lesson, we can learn how to set element delays to generate focused beams.
 
-![Unfocused Bscan](/../../../../work/FocusPXDemo/resources/Unfocused Bscan.PNG)
+![Unfocused Bscan](/resources/Unfocused Bscan.PNG)
 
 #### 8.6 Source Code
 

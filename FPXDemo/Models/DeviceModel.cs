@@ -58,47 +58,10 @@ namespace FPXDemo.Models
             beamSet = beamSetFactory.CreateBeamSetConventional("Conventional");
         }
 
-        public void CreatPABeamSet()
-        {
-            IDeviceConfiguration deviceConfiguration = device.GetConfiguration();
-            ultrasoundConfiguration = deviceConfiguration.GetUltrasoundConfiguration();
-            digitizerTechnology = ultrasoundConfiguration.GetDigitizerTechnology(UltrasoundTechnology.PhasedArray);
-            IBeamSetFactory beamSetFactory = digitizerTechnology.GetBeamSetFactory();
-            var beamFormations = GetBeamFormationCollection(beamSetFactory);
-            beamSet = beamSetFactory.CreateBeamSetPhasedArray("Phased Array", beamFormations);
-        }
-
-        public IBeamFormationCollection GetBeamFormationCollection(IBeamSetFactory beamSetFactory)
-        {
-            var beamFormations = beamSetFactory.CreateBeamFormationCollection();
-            uint usedElementPerBeam = 8;
-            uint totalElements = 32;
-
-            for (uint beamIndex=0; beamIndex<totalElements-usedElementPerBeam+1; beamIndex++)
-            {
-                var beamFormation = beamSetFactory.CreateBeamFormation(
-                    usedElementPerBeam,
-                    usedElementPerBeam,
-                    beamIndex + 1,
-                    beamIndex + 1);
-
-                beamFormations.Add(beamFormation);
-            }
-
-            return beamFormations;
-        }
-
         public void BindConnector()
         {
             // Create a connetor at P1/R1 with index 4
             IConnector connector = digitizerTechnology.GetConnectorCollection().GetConnector(4);
-            ultrasoundConfiguration.GetFiringBeamSetCollection().Add(beamSet, connector);
-        }
-
-        public void BindPAConnector()
-        {
-            // Create a PA connetor, index is 0
-            IConnector connector = digitizerTechnology.GetConnectorCollection().GetConnector(0);
             ultrasoundConfiguration.GetFiringBeamSetCollection().Add(beamSet, connector);
         }
 
@@ -146,33 +109,6 @@ namespace FPXDemo.Models
                     ascanData[i] = (int)Marshal.ReadInt32(ascan.GetData(), i * 4);
                 }
                 return ascanData;
-            }
-
-            return null;
-        }
-
-        public int[][] CollectBscanData()
-        {
-            if (acquisition == null)
-            {
-                return null;
-            }
-
-            var result = acquisition.WaitForDataEx();
-            if (result.status == IAcquisition.WaitForDataResultEx.Status.DataAvailable)
-            {
-                var cycleData = result.cycleData;
-                var ascans = cycleData.GetAscanCollection();
-                int[][] bscanData = new int[ascans.GetCount()][];
-
-                for (uint index=0; index<ascans.GetCount(); index++)
-                {
-                    var ascan = ascans.GetAscan(index);
-                    int[] ascanData = new int[ascan.GetSampleQuantity()];
-                    Marshal.Copy(ascan.GetData(), ascanData, 0, (int)ascan.GetSampleQuantity());
-                    bscanData[index] = ascanData;
-                }
-                return bscanData;
             }
 
             return null;

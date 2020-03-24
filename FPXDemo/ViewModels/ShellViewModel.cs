@@ -193,10 +193,10 @@ namespace FPXDemo.ViewModels
                     if (bscanData == null)
                     { break; }
 
-                    plotData = new double[bscanData.GetLength(0), bscanData.GetLength(1)];
+                    plotData = new double[bscanData.GetLength(0), bscanData[0].GetLength(0)];
                     for (int i=0; i< bscanData.GetLength(0); i++)
                     {
-                        for (int j=0; j<bscanData.GetLength(1); j++)
+                        for (int j=0; j<bscanData[0].GetLength(0); j++)
                         {
                             plotData[i, j] = (double)bscanData[i][j];
                         }
@@ -234,8 +234,8 @@ namespace FPXDemo.ViewModels
             var taskConsumeData = new Task(() => deviceModel.ConsumeData());
             taskConsumeData.Start();
 
-            var taskPlottingAscan = new Task(() => PlottingBscan());
-            taskPlottingAscan.Start();
+            var taskPlottingBscan = new Task(() => PlottingBscan());
+            taskPlottingBscan.Start();
         }
 
         public void StopAscan()

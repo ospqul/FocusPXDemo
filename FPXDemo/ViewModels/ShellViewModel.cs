@@ -34,6 +34,24 @@ namespace FPXDemo.ViewModels
         public ShellViewModel()
         {
             InitBscanPlot();
+
+            // Init a probe
+            ProbeModel probe = new ProbeModel
+            {
+                TotalElements = 32,
+                UsedElementsPerBeam = 8,
+                Frequency = 5,
+                Pitch = 1,
+            };
+
+            // Calculate element positions
+            var positions = DelayLawModel.GetElementsPosition(probe);
+
+            // Calculate element delays
+            double velocity = 5800; // stainless steel block
+            double depth = 17; // mm
+            var delays = DelayLawModel.GetElementDelays(positions, velocity, depth);
+
         }
 
         public void InitBscanPlot()

@@ -6,7 +6,7 @@ This tutorial will help you build a Focus PX application based on OpenView SDK f
 
 The source codes are available in Github: https://github.com/ospqul/FocusPXDemo/tree/master
 
-Video courses are also available [here](https://github.com/ospqul/FocusPXDemo/tree/master/Training%20Videos).
+Video courses are also available [here](https://github.com/ospqul/FocusPXDemoVideos/tree/master/Videos).
 
 You could clone a local repo: `git clone https://github.com/ospqul/FocusPXDemo.git`
 

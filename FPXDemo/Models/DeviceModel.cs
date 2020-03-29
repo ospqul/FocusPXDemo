@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -65,34 +66,73 @@ namespace FPXDemo.Models
             ultrasoundConfiguration.GetFiringBeamSetCollection().Add(beamSet, connector);
         }
 
-        public void CreatePABeamSet()
+        public void CreatePABeamSet(IProbeModel probe)
         {
             IDeviceConfiguration deviceConfiguration = device.GetConfiguration();
             ultrasoundConfiguration = deviceConfiguration.GetUltrasoundConfiguration();
             digitizerTechnology = ultrasoundConfiguration.GetDigitizerTechnology(UltrasoundTechnology.PhasedArray);
             var beamSetFactory = digitizerTechnology.GetBeamSetFactory();
-            var beamFormations = GetBeamFormations(beamSetFactory);
+            var beamFormations = GetBeamFormations(beamSetFactory, probe);
             beamSet = beamSetFactory.CreateBeamSetPhasedArray("Phased Array", beamFormations);
         }
 
-        public IBeamFormationCollection GetBeamFormations(IBeamSetFactory beamSetFactory)
+        public void CreatePAFocusedBeamSet(IProbeModel probe, double[] elementDelays)
         {
-            uint usedElementPerBeam = 8;
-            uint totalElements = 32;
+            IDeviceConfiguration deviceConfiguration = device.GetConfiguration();
+            ultrasoundConfiguration = deviceConfiguration.GetUltrasoundConfiguration();
+            digitizerTechnology = ultrasoundConfiguration.GetDigitizerTechnology(UltrasoundTechnology.PhasedArray);
+            var beamSetFactory = digitizerTechnology.GetBeamSetFactory();
+            var beamFormations = GetFocusedBeamFormations(beamSetFactory, probe, elementDelays);
+            beamSet = beamSetFactory.CreateBeamSetPhasedArray("Phased Array", beamFormations);
+        }
 
+        public IBeamFormationCollection GetFocusedBeamFormations(IBeamSetFactory beamSetFactory, IProbeModel probe, double[] elementDelays)
+        {
             var beamFormations = beamSetFactory.CreateBeamFormationCollection();
 
-            for (uint beamIndex=0; beamIndex<totalElements-usedElementPerBeam+1; beamIndex++)
+            for (uint beamIndex = 0; beamIndex < probe.TotalElements - probe.UsedElementsPerBeam + 1; beamIndex++)
             {
                 var beamFormation = beamSetFactory.CreateBeamFormation(
-                    usedElementPerBeam,
-                    usedElementPerBeam,
+                    probe.UsedElementsPerBeam,
+                    probe.UsedElementsPerBeam,
                     beamIndex + 1,
                     beamIndex + 1);
 
+                var pulserDelays = beamFormation.GetPulserDelayCollection();
+                var receiverDelays = beamFormation.GetReceiverDelayCollection();
+
+                for (uint elemIndex = 0; elemIndex < probe.UsedElementsPerBeam; ++elemIndex)
+                {
+                    pulserDelays.GetElementDelay(elemIndex).SetElementId(beamIndex + elemIndex + 1);
+                    pulserDelays.GetElementDelay(elemIndex).SetDelay(elementDelays[elemIndex]);
+                    Debug.WriteLine($"Pulser delay { pulserDelays.GetElementDelay(elemIndex).GetElementId() }:" +
+                        $" { pulserDelays.GetElementDelay(elemIndex).GetDelay() }");
+
+                    receiverDelays.GetElementDelay(elemIndex).SetElementId(beamIndex + elemIndex + 1);
+                    receiverDelays.GetElementDelay(elemIndex).SetDelay(elementDelays[elemIndex]);
+                    Debug.WriteLine($"Receiver delay { receiverDelays.GetElementDelay(elemIndex).GetElementId() }:" +
+                        $" { receiverDelays.GetElementDelay(elemIndex).GetDelay() }");
+                }
+
                 beamFormations.Add(beamFormation);
             }
+            return beamFormations;
+        }
 
+        public IBeamFormationCollection GetBeamFormations(IBeamSetFactory beamSetFactory, IProbeModel probe)
+        {                     
+            var beamFormations = beamSetFactory.CreateBeamFormationCollection();
+
+            for (uint beamIndex=0; beamIndex< probe .TotalElements - probe.UsedElementsPerBeam + 1; beamIndex++)
+            {
+                var beamFormation = beamSetFactory.CreateBeamFormation(
+                    probe.UsedElementsPerBeam,
+                    probe.UsedElementsPerBeam,
+                    beamIndex + 1,
+                    beamIndex + 1);
+                
+                beamFormations.Add(beamFormation);
+            }
             return beamFormations;
         }
 

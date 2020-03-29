@@ -21,6 +21,8 @@ namespace FPXDemo.ViewModels
         public HeatMapSeries heatmapSeries { get; set; }
         public double[,] plotData = { };
 
+        private IProbeModel probe { get; set; }
+
         private string _serialNumber;
         private string _ipAddress;
         private string _beamSetName;
@@ -34,6 +36,14 @@ namespace FPXDemo.ViewModels
         public ShellViewModel()
         {
             InitializeBscanGraph();
+
+            probe = new ProbeModel
+            {
+                UsedElementsPerBeam = 8,
+                TotalElements = 32,
+                Pitch = 1,
+                Frequency = 5,
+            };
         }
 
         public void InitializeBscanGraph()
@@ -67,7 +77,12 @@ namespace FPXDemo.ViewModels
             IPAddress = deviceModel.device.GetInfo().GetAddressIPv4();
             //CreateBeamSet();
             //BindConnector();
-            deviceModel.CreatePABeamSet();
+
+            var positions = DelayLawModel.GetElementsPosition(probe);
+            // stainless steel block velocity is about 5800m/s
+            // indication depth is about 15 mm
+            var delays = DelayLawModel.GetElementDelays(positions, 5800, 15);
+            deviceModel.CreatePABeamSet(probe);
             deviceModel.BindPAConnector();
             InitAcquisition();
 

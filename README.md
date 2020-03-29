@@ -1297,7 +1297,7 @@ The indication in test block is a dot, but we only see line segment in bscan ima
 Run `git checkout 8_Plot_Bscan` to get source code for this section.
 
 ## 9 Calculate Focused Beam Delays
-
+![](https://github.com/ospqul/FocusPXDemo/blob/master/resources/focused%20beam%200%20degree.PNG)
 #### 9.1 Create a probe model
 
 Add a class named `ProbeModel.cs`.

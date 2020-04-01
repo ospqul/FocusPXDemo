@@ -205,7 +205,7 @@ public IBeamFormationCollection GetFocusedBeamFormationCollection(
 ```
 
 Here is a screenshot:
-
+![](https://github.com/ospqul/FocusPXDemo/blob/master/resources/Focused%20and%20Unfocused%20Bscan.PNG)
 #### 10.5 Source Code
 
 Run `git checkout 10_Plot_and_Compoare_Focused_and_Unfocused_Bscan` to get source code for this section.

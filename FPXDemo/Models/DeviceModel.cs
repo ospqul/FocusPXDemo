@@ -88,6 +88,69 @@ namespace FPXDemo.Models
             return beamFormations;
         }
 
+        // Create Focused Beam set
+        public void CreatPAFocusedBeamSet(ProbeModel probe, double[] elementDelays)
+        {
+            IDeviceConfiguration deviceConfiguration = device.GetConfiguration();
+            ultrasoundConfiguration = deviceConfiguration.GetUltrasoundConfiguration();
+            digitizerTechnology = ultrasoundConfiguration.GetDigitizerTechnology(UltrasoundTechnology.PhasedArray);
+            IBeamSetFactory beamSetFactory = digitizerTechnology.GetBeamSetFactory();
+            var beamFormations = GetFocusedBeamFormationCollection(beamSetFactory, probe, elementDelays);
+            beamSet = beamSetFactory.CreateBeamSetPhasedArray("Phased Array", beamFormations);
+        }
+
+        public IBeamFormationCollection GetFocusedBeamFormationCollection(
+            IBeamSetFactory beamSetFactory,
+            ProbeModel probe,
+            double[] elementDelays)
+        {
+            var beamFormations = beamSetFactory.CreateBeamFormationCollection();
+            uint usedElementPerBeam = probe.UsedElementsPerBeam;
+            uint totalElements = probe.TotalElements;
+
+            // Add Focused beam formations
+            for (uint beamIndex = 0; beamIndex < totalElements - usedElementPerBeam + 1; beamIndex++)
+            {
+                var beamFormation = beamSetFactory.CreateBeamFormation(
+                    usedElementPerBeam,
+                    usedElementPerBeam,
+                    beamIndex + 1,
+                    beamIndex + 1);
+
+                // Add element delays
+                var pulserDelays = beamFormation.GetPulserDelayCollection();
+                var receiverDelays = beamFormation.GetReceiverDelayCollection();
+
+                for (uint elemIndex=0; elemIndex< usedElementPerBeam; elemIndex++)
+                {
+                    // Add pulser delay
+                    pulserDelays.GetElementDelay(elemIndex).SetElementId(elemIndex + beamIndex + 1);
+                    pulserDelays.GetElementDelay(elemIndex).SetDelay(elementDelays[elemIndex]);
+
+                    //Add receiver delay
+                    receiverDelays.GetElementDelay(elemIndex).SetElementId(elemIndex + beamIndex + 1);
+                    receiverDelays.GetElementDelay(elemIndex).SetDelay(elementDelays[elemIndex]);
+                }
+
+                beamFormations.Add(beamFormation);
+            }
+
+            // Add unfocused beam formations
+            for (uint beamIndex = 0; beamIndex < totalElements - usedElementPerBeam + 1; beamIndex++)
+            {
+                var beamFormation = beamSetFactory.CreateBeamFormation(
+                    usedElementPerBeam,
+                    usedElementPerBeam,
+                    beamIndex + 1,
+                    beamIndex + 1);
+
+                beamFormations.Add(beamFormation);
+            }
+
+            return beamFormations;
+        }
+
+
         public void BindConnector()
         {
             // Create a connetor at P1/R1 with index 4

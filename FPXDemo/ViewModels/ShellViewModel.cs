@@ -21,6 +21,9 @@ namespace FPXDemo.ViewModels
         public HeatMapSeries heatMapSeries { get; set; }
         public double[,] plotData = { };
 
+        // Probe
+        public ProbeModel probe { get; set; }
+
         private string _serialNumber;
         private string _ipAddress;
         private string _beamSetName;
@@ -36,14 +39,17 @@ namespace FPXDemo.ViewModels
             InitBscanPlot();
 
             // Init a probe
-            ProbeModel probe = new ProbeModel
+            probe = new ProbeModel
             {
-                TotalElements = 32,
-                UsedElementsPerBeam = 8,
+                TotalElements = 64,
+                UsedElementsPerBeam = 16,
                 Frequency = 5,
                 Pitch = 1,
             };
+        }
 
+        public double[] GetDelays()
+        {
             // Calculate element positions
             var positions = DelayLawModel.GetElementsPosition(probe);
 
@@ -52,6 +58,7 @@ namespace FPXDemo.ViewModels
             double depth = 17; // mm
             var delays = DelayLawModel.GetElementDelays(positions, velocity, depth);
 
+            return delays;
         }
 
         public void InitBscanPlot()
@@ -92,7 +99,12 @@ namespace FPXDemo.ViewModels
             //BindConnector();
 
             // Create PA Beam Set
-            deviceModel.CreatPABeamSet();
+            //deviceModel.CreatPABeamSet();
+            //deviceModel.BindPAConnector();
+
+            // Create PA Focused Beam Set
+            var delays = GetDelays();
+            deviceModel.CreatPAFocusedBeamSet(probe, delays);
             deviceModel.BindPAConnector();
 
             InitAcquisition();

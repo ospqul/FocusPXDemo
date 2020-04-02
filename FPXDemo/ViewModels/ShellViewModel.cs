@@ -45,8 +45,8 @@ namespace FPXDemo.ViewModels
             // Init a probe
             probe = new ProbeModel
             {
-                TotalElements = 64,
-                UsedElementsPerBeam = 16,
+                TotalElements = 32, // total 32 elements
+                UsedElementsPerBeam = 32, // use all 32 elements
                 Frequency = 5,
                 Pitch = 1,
             };
@@ -59,7 +59,10 @@ namespace FPXDemo.ViewModels
                 AngleResolution = 1,
                 FocusDepth = 17,  //mm
             };
+        }
 
+        public double[][] GetSscanDelay()
+        {
             // Calculate sscan delays
             // Calculate element positions
             var positions = DelayLawModel.GetElementsPosition(probe);
@@ -67,6 +70,7 @@ namespace FPXDemo.ViewModels
             // Calculate element delays
             double velocity = 5800; // stainless steel block
             var delays = DelayLawModel.GetSscanDelays(positions, velocity, sscanModel);
+            return delays;
         }
 
         public double[] GetDelays()
@@ -125,8 +129,13 @@ namespace FPXDemo.ViewModels
             //deviceModel.BindPAConnector();
 
             // Create PA Focused Beam Set
-            var delays = GetDelays();
-            deviceModel.CreatPAFocusedBeamSet(probe, delays);
+            //var delays = GetDelays();
+            //deviceModel.CreatPAFocusedBeamSet(probe, delays);
+            //deviceModel.BindPAConnector();
+
+            // Create PA Sscan Beam Set
+            var delays = GetSscanDelay();
+            deviceModel.CreatPASscanBeamSet(probe, delays);
             deviceModel.BindPAConnector();
 
             InitAcquisition();

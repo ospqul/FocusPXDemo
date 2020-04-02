@@ -1,4 +1,4 @@
-## 11 Calculate Sscan Element delay.md
+## 11 Calculate Sscan Element delay
 
 #### 11.1 SscanModel class
 

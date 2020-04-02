@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace FPXDemo.ViewModels
 {
@@ -23,6 +24,9 @@ namespace FPXDemo.ViewModels
 
         // Probe
         public ProbeModel probe { get; set; }
+
+        // Sscan Model setting
+        public SscanModel sscanModel { get; set; }
 
         private string _serialNumber;
         private string _ipAddress;
@@ -46,6 +50,23 @@ namespace FPXDemo.ViewModels
                 Frequency = 5,
                 Pitch = 1,
             };
+
+            // Init Sscan Settings
+            sscanModel = new SscanModel
+            {
+                StartAngle = -45, // degree
+                EndAngle = 45,
+                AngleResolution = 1,
+                FocusDepth = 17,  //mm
+            };
+
+            // Calculate sscan delays
+            // Calculate element positions
+            var positions = DelayLawModel.GetElementsPosition(probe);
+
+            // Calculate element delays
+            double velocity = 5800; // stainless steel block
+            var delays = DelayLawModel.GetSscanDelays(positions, velocity, sscanModel);
         }
 
         public double[] GetDelays()
@@ -56,7 +77,8 @@ namespace FPXDemo.ViewModels
             // Calculate element delays
             double velocity = 5800; // stainless steel block
             double depth = 17; // mm
-            var delays = DelayLawModel.GetElementDelays(positions, velocity, depth);
+            Point focalPoint = new Point(0, depth);
+            var delays = DelayLawModel.GetElementDelays(positions, velocity, focalPoint);
 
             return delays;
         }

@@ -106,6 +106,7 @@
     <Compile Include="Models\DelayLawModel.cs" />
     <Compile Include="Models\DeviceModel.cs" />
     <Compile Include="Models\ProbeModel.cs" />
+    <Compile Include="Models\SscanModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
     <Compile Include="Views\ShellView.xaml.cs">
       <DependentUpon>ShellView.xaml</DependentUpon>

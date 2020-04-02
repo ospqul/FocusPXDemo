@@ -38,13 +38,14 @@ namespace FPXDemo.Models
         public static double[] GetElementDelays(
             List<Point> elementPositions, // elements' positions
             double velocity, // Test block's velocity, in m/s
-            double trueDepth // Focal point's true depth, in mm
+            //double trueDepth // Focal point's true depth, in mm
+            Point focalPoint // Focal point's position in mm
             )
         {
             var elementNumber = elementPositions.Count;
             double[] elementDelays = new double[elementNumber];
 
-            Point focalPoint = new Point(0, trueDepth);
+            //Point focalPoint = new Point(0, trueDepth);
 
             // Calculate each element's time of flight to focal point
             for (int i=0; i< elementNumber; i++)
@@ -70,5 +71,51 @@ namespace FPXDemo.Models
             return elementDelays;
         }
 
+        // calculate angles
+        public static List<double> GetSscanAngles(SscanModel sscanModel)
+        {
+            List<double> angles = new List<double>();
+            var angle = sscanModel.StartAngle;
+            while (angle <= sscanModel.EndAngle)
+            {
+                angles.Add(angle);
+                angle = angle + sscanModel.AngleResolution;
+            }
+            return angles;
+        }
+
+        // calculate sscan element delays
+        // Every beam's element delays are different
+        // so Sscan delay is a two dimension array
+        // first dimension is beam, second dimension is element
+        public static double[][] GetSscanDelays(
+            List<Point> elementPositions, // elements' positions
+            double velocity, // Test block's velocity, in m/s
+            SscanModel sscanModel // Focal point's true depth, in mm
+            )
+        {
+            var angles = GetSscanAngles(sscanModel);
+            double[][] delays = new double[angles.Count][];
+            int elemNum = elementPositions.Count;
+
+            // Loop through each angle beam
+            for (int angleIndex=0; angleIndex< angles.Count; angleIndex++)
+            {
+                // calculate focal point
+                double focalY = sscanModel.FocusDepth;
+                // focalX = Tan(angle) * Focus depth
+                double focalX = Math.Tan(angles[angleIndex] * Math.PI / 180)
+                    * sscanModel.FocusDepth;
+                Point focalPoint = new Point(focalX, focalY);
+
+                Debug.WriteLine($"Beam Angle: {angles[angleIndex]}," +
+                    $" Focal Point: X {focalPoint.X} Y {focalPoint.Y}");
+
+                // calculate delays
+                delays[angleIndex] = GetElementDelays(elementPositions, velocity, focalPoint);
+            }
+
+            return delays;
+        }
     }
 }

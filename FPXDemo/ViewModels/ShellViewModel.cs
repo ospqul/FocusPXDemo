@@ -27,6 +27,7 @@ namespace FPXDemo.ViewModels
 
         // Sscan Model setting
         public SscanModel sscanModel { get; set; }
+        public SscanGraphModel sscanGraph { get; set; }
 
         private string _serialNumber;
         private string _ipAddress;
@@ -40,7 +41,7 @@ namespace FPXDemo.ViewModels
 
         public ShellViewModel()
         {
-            InitBscanPlot();
+            //InitBscanPlot();
 
             // Init a probe
             probe = new ProbeModel
@@ -59,6 +60,10 @@ namespace FPXDemo.ViewModels
                 AngleResolution = 1,
                 FocusDepth = 17,  //mm
             };
+
+            // Init Sscan Grap and plot
+            InitSscanGraph();
+            InitSscanPlot();
         }
 
         public double[][] GetSscanDelay()
@@ -113,6 +118,56 @@ namespace FPXDemo.ViewModels
 
         }
 
+        public void InitSscanGraph()
+        {
+            AxisModel XAxis = new AxisModel
+            {
+                Min = -20, // mm
+                Max = 20, // mm
+                Resolution = 0.1 // mm
+            };
+
+            AxisModel YAxis = new AxisModel
+            {
+                Min = 0, // mm
+                Max = 50, // mm
+                Resolution = 0.1 // mm
+            };
+
+            sscanGraph = new SscanGraphModel
+            {
+                XAxis = XAxis,
+                YAxis = YAxis,
+            };
+
+        }
+
+        public void InitSscanPlot()
+        {
+            plotModel = new PlotModel
+            {
+                Title = "Sscan Plotting",
+            };
+
+            // Add axis
+            var axis = new LinearColorAxis();
+            plotModel.Axes.Add(axis);
+
+            // Add series
+            heatMapSeries = new HeatMapSeries
+            {
+                X0 = sscanGraph.XAxis.Min,
+                X1 = sscanGraph.XAxis.Max,
+                Y0 = sscanGraph.YAxis.Min,
+                Y1 = sscanGraph.YAxis.Max,
+                Interpolate = true,
+                RenderMethod = HeatMapRenderMethod.Bitmap,
+                Data = plotData,
+            };
+            plotModel.Series.Add(heatMapSeries);
+
+        }
+
         public async void ConnectDevice()
         {
             //deviceModel = new DeviceModel();
@@ -148,7 +203,10 @@ namespace FPXDemo.ViewModels
             //StartAscan();
 
             // Plotting Bscan
-            StartBscan();
+            //StartBscan();
+
+            // Plotting Sscan
+            StartSscan();
         }
 
         public void CreateBeamSet()
@@ -286,6 +344,67 @@ namespace FPXDemo.ViewModels
             }
         }
 
+        public void PlottingSscan()
+        {
+            int[][] rawData;
+            int plottingIndex = 0;
+
+            while (true)
+            {
+                try
+                {
+                    rawData = deviceModel.CollectBscanData();
+                    if (rawData.GetLength(0) < 1)
+                    { break; }
+
+                    // Get plot points
+                    var plotPoints = sscanGraph.GetPlotPoints();
+
+                    plotData = new double[plotPoints.GetLength(0), plotPoints.GetLength(1)];
+
+                    // Assign plot value to each plot points
+                    for (int xIndex=0; xIndex< plotPoints.GetLength(0); xIndex++)
+                    {
+                        for (int yIndex=0; yIndex< plotPoints.GetLength(1); yIndex++)
+                        {
+                            // current plot point
+                            var p = plotPoints[xIndex, yIndex];
+                            // X / Y = Tan(angle)
+                            double angle = Math.Atan2(p.X, p.Y) * 180 / Math.PI;
+
+                            // if angle is not in range (start angle, end angle)
+                            // then assign this plot point value = 0
+                            if ((angle < sscanModel.StartAngle) || (angle > sscanModel.EndAngle))
+                            {
+                                plotData[xIndex, yIndex] = 0;
+                            }
+                            // if angle is in this range, then assgin it's value according to raw data
+                            else
+                            {
+                                double radius = Math.Sqrt(p.X * p.X + p.Y * p.Y);
+                                // find this plot point in which beam
+                                int rawXIndex = (int)Math.Round((angle - sscanModel.StartAngle) / sscanModel.AngleResolution);
+                                // find nearest Ascan value in this beam
+                                double velocity = 5800; // m/s
+                                int rawYIndex = (int)Math.Round((radius * 2e5) / velocity);
+                                plotData[xIndex, yIndex] = Math.Abs(rawData[rawXIndex][rawYIndex]);
+                            }
+                        }
+                    }
+                    plotModel.InvalidatePlot(true);
+                    heatMapSeries.Data = plotData;
+
+                    plottingIndex += 1;
+                    Logging = plottingIndex.ToString();
+                }
+                catch (Exception)
+                {
+
+                    //throw;
+                }
+            }
+        }
+
         public void StartAscan()
         {
             deviceModel.acquisition.ApplyConfiguration();
@@ -308,6 +427,18 @@ namespace FPXDemo.ViewModels
 
             var taskPlottingBscan = new Task(() => PlottingBscan());
             taskPlottingBscan.Start();
+        }
+
+        public void StartSscan()
+        {
+            deviceModel.acquisition.ApplyConfiguration();
+            deviceModel.acquisition.Start();
+
+            var taskConsumeData = new Task(() => deviceModel.ConsumeData());
+            taskConsumeData.Start();
+
+            var taskPlottingSscan = new Task(() => PlottingSscan());
+            taskPlottingSscan.Start();
         }
 
         public void StopAscan()

@@ -192,6 +192,8 @@ namespace FPXDemo.ViewModels
             var delays = GetSscanDelay();
             deviceModel.CreatPASscanBeamSet(probe, delays);
             deviceModel.BindPAConnector();
+            // correct sscan
+            CorrectSscan(delays);
 
             InitAcquisition();
 
@@ -207,6 +209,17 @@ namespace FPXDemo.ViewModels
 
             // Plotting Sscan
             StartSscan();
+        }
+
+        // take middle element's delay to correct sscan plotting
+        public void CorrectSscan(double[][] delays)
+        {
+            uint middleElement = probe.UsedElementsPerBeam / 2;
+            for (uint i=0; i< delays.GetLength(0); i++)
+            {
+                // set ascan start to the double of middle element's delay
+                deviceModel.beamSet.GetBeam(i).SetAscanStart(delays[i][middleElement]*2);
+            }
         }
 
         public void CreateBeamSet()
@@ -514,8 +527,6 @@ namespace FPXDemo.ViewModels
             }
         }
 
-
-
         public string Logging
         {
             get { return _logging; }
@@ -525,8 +536,6 @@ namespace FPXDemo.ViewModels
                 NotifyOfPropertyChange(() => Logging);
             }
         }
-
-
 
     }
 }

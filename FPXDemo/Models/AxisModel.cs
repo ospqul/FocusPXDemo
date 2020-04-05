@@ -17,7 +17,7 @@ namespace FPXDemo.Models
         public List<double> GetPoints()
         {
             List<double> points = new List<double>();
-            int numberOfPoints = (int)Math.Floor((Max - Min) / Resolution);
+            int numberOfPoints = (int)Math.Floor((Max - Min) / Resolution) + 1;
             for (int i=0; i<numberOfPoints; i++)
             {
                 points.Add(Min + i * Resolution);

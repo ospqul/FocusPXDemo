@@ -214,11 +214,21 @@ namespace FPXDemo.ViewModels
         // take middle element's delay to correct sscan plotting
         public void CorrectSscan(double[][] delays)
         {
-            uint middleElement = probe.UsedElementsPerBeam / 2;
             for (uint i=0; i< delays.GetLength(0); i++)
             {
-                // set ascan start to the double of middle element's delay
-                deviceModel.beamSet.GetBeam(i).SetAscanStart(delays[i][middleElement]*2);
+                if (probe.UsedElementsPerBeam % 2 == 1)
+                {
+                    uint mid = probe.UsedElementsPerBeam / 2 + 1;
+                    // set ascan start to the double of middle element's delay
+                    deviceModel.beamSet.GetBeam(i).SetAscanStart(delays[i][mid] * 2);
+                }
+                else
+                {
+                    uint mid = probe.UsedElementsPerBeam / 2;
+                    // set ascan start to the sum of the middle two elements' delays
+                    deviceModel.beamSet.GetBeam(i).SetAscanStart(delays[i][mid] + delays[i][mid+1]);
+                }
+                
             }
         }
 

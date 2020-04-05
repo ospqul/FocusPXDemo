@@ -99,6 +99,7 @@ InitAcquisition();
 
 #### 14.3 Plot Sscan
 
+Now we can see a straight backwall, and indication moves along a straight line as expected.
 ![](https://github.com/ospqul/FocusPXDemo/blob/master/resources/Sscan%20after%20correction.PNG)
 
 #### 14.4 Source Code

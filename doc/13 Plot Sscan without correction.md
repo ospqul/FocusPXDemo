@@ -1,9 +1,9 @@
 ## 13 Plot Sscan without correction
 
-In [Lesson 10](https://github.com/ospqul/FocusPXDemo/blob/master/doc/10 Plot and Compare Focused and Unfocused Bscan.md) B-scan's every beam is 0 degree angle, so its plot image is a rectangle. However, each beam in S-scan has a different angle, therefore, s-scan plot image should be a sector shape.
+In [Lesson 10](https://github.com/ospqul/FocusPXDemo/blob/master/doc/10%20Plot%20and%20Compare%20Focused%20and%20Unfocused%20Bscan.md) B-scan's every beam is 0 degree angle, so its plot image is a rectangle. However, each beam in S-scan has a different angle, therefore, s-scan plot image should be a sector shape.
 
 In our example below, plot area X range is (-20, 20), Y range is (0, 50), distance between plot point is 0.1 mm. So we have 401 x 501 plot points. If plot point locates beyond plotting area, then it's plot value = 0; if plot point locates within plotting area, then we calculate its angle and distance to the center of probe, and find the nearest value in Ascan.
-
+![](https://github.com/ospqul/FocusPXDemo/blob/master/resources/Sscan%20Plot%20Area.PNG)
 #### 13.1 Create AxisModel class
 
 Create a new class `AxisModel` to describe plot area's axis. It has three properties: `Min` value, `Max` value and `Resolution`. Their units are mm.
@@ -22,7 +22,7 @@ public class AxisModel
     public List<double> GetPoints()
     {
         List<double> points = new List<double>();
-        int numberOfPoints = (int)Math.Floor((Max - Min) / Resolution);
+        int numberOfPoints = (int)Math.Floor((Max - Min) / Resolution) + 1;
         for (int i=0; i<numberOfPoints; i++)
         {
             points.Add(Min + i * Resolution);
@@ -271,7 +271,7 @@ public void PlottingSscan()
 ```
 
 #### 13.6 Plot Sscan
-
+As you can see from the S-scan plot image below, its backwall is not straight. We will discuss the reason and how to correct it in the next [lesson 14](https://github.com/ospqul/FocusPXDemo/blob/master/doc/14%20Plot%20Sscan%20after%20correction.md).
 ![](https://github.com/ospqul/FocusPXDemo/blob/master/resources/Sscan%20before%20correction.PNG)
 
 #### 13.7 Source Code

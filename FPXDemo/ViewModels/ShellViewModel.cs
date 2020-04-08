@@ -16,18 +16,10 @@ namespace FPXDemo.ViewModels
     {
         public DeviceModel deviceModel { get; set; }
         public PlotModel plotModel { get; set; }
-        public LineSeries lineSeries { get; set; }
-
-        // Bscan Plotting
-        public HeatMapSeries heatMapSeries { get; set; }
-        public double[,] plotData = { };
+        public LineSeries lineSeries { get; set; }     
 
         // Probe
         public ProbeModel probe { get; set; }
-
-        // Sscan Model setting
-        public SscanModel sscanModel { get; set; }
-        public SscanGraphModel sscanGraph { get; set; }
 
         private string _serialNumber;
         private string _ipAddress;
@@ -40,334 +32,113 @@ namespace FPXDemo.ViewModels
 
 
         public ShellViewModel()
-        {
-            //InitBscanPlot();
-
+        {            
             // Init a probe
             probe = new ProbeModel
             {
-                TotalElements = 32, // total 32 elements
-                UsedElementsPerBeam = 32, // use all 32 elements
+                TotalElements = 64, // total 32 elements
+                UsedElementsPerBeam = 1, // use all 32 elements
                 Frequency = 5,
                 Pitch = 1,
             };
 
-            // Init Sscan Settings
-            sscanModel = new SscanModel
-            {
-                StartAngle = -45, // degree
-                EndAngle = 45,
-                AngleResolution = 1,
-                FocusDepth = 17,  //mm
-            };
+            // Init Ascan
+            InitAscan();
 
-            // Init Sscan Grap and plot
-            InitSscanGraph();
-            InitSscanPlot();
+            // Init Cscan
+            InitCscan();
+
         }
 
-        public double[][] GetSscanDelay()
-        {
-            // Calculate sscan delays
-            // Calculate element positions
-            var positions = DelayLawModel.GetElementsPosition(probe);
-
-            // Calculate element delays
-            double velocity = 5800; // stainless steel block
-            var delays = DelayLawModel.GetSscanDelays(positions, velocity, sscanModel);
-            return delays;
-        }
-
-        public double[] GetDelays()
-        {
-            // Calculate element positions
-            var positions = DelayLawModel.GetElementsPosition(probe);
-
-            // Calculate element delays
-            double velocity = 5800; // stainless steel block
-            double depth = 17; // mm
-            Point focalPoint = new Point(0, depth);
-            var delays = DelayLawModel.GetElementDelays(positions, velocity, focalPoint);
-
-            return delays;
-        }
-
-        public void InitBscanPlot()
+        public void InitAscan()
         {
             plotModel = new PlotModel
             {
-                Title = "Bscan Plotting",
+                Title = "Ascan Plotting",
             };
 
-            // Add axis
-            var axis = new LinearColorAxis();
-            plotModel.Axes.Add(axis);
-
-            // Add series
-            heatMapSeries = new HeatMapSeries
+            LinearAxis xAxis = new LinearAxis
             {
-                X0 = 0,
-                X1 = 25,
-                Y0 = 0,
-                Y1 = 5000,
-                Interpolate = true,
-                RenderMethod = HeatMapRenderMethod.Bitmap,
-                Data = plotData,
+                Position = AxisPosition.Bottom,
+                MajorGridlineStyle = LineStyle.Solid,
             };
-            plotModel.Series.Add(heatMapSeries);
+            plotModel.Axes.Add(xAxis);
 
+            LinearAxis yAxis = new LinearAxis
+            {
+                Position = AxisPosition.Left,
+                MajorGridlineStyle = LineStyle.Solid,
+            };
+            plotModel.Axes.Add(yAxis);
+
+            lineSeries = new LineSeries
+            {
+                Title = "Ascan Data",
+                Color = OxyColors.Blue,
+                StrokeThickness = 1.5,
+            };
+            plotModel.Series.Add(lineSeries);
         }
 
-        public void InitSscanGraph()
+        public void InitCscan()
         {
-            AxisModel XAxis = new AxisModel
-            {
-                Min = -20, // mm
-                Max = 20, // mm
-                Resolution = 0.1 // mm
-            };
 
-            AxisModel YAxis = new AxisModel
-            {
-                Min = 0, // mm
-                Max = 50, // mm
-                Resolution = 0.1 // mm
-            };
-
-            sscanGraph = new SscanGraphModel
-            {
-                XAxis = XAxis,
-                YAxis = YAxis,
-            };
-
-        }
-
-        public void InitSscanPlot()
-        {
-            plotModel = new PlotModel
-            {
-                Title = "Sscan Plotting",
-            };
-
-            // Add axis
-            var axis = new LinearColorAxis();
-            plotModel.Axes.Add(axis);
-
-            // Add series
-            heatMapSeries = new HeatMapSeries
-            {
-                X0 = sscanGraph.XAxis.Min,
-                X1 = sscanGraph.XAxis.Max,
-                Y0 = sscanGraph.YAxis.Min,
-                Y1 = sscanGraph.YAxis.Max,
-                Interpolate = true,
-                RenderMethod = HeatMapRenderMethod.Bitmap,
-                Data = plotData,
-            };
-            plotModel.Series.Add(heatMapSeries);
-
-        }
+        }     
 
         public async void ConnectDevice()
         {
-            //deviceModel = new DeviceModel();
             deviceModel = await Task.Run(() => new DeviceModel());
             SerialNumber = deviceModel.device.GetInfo().GetSerialNumber();
             IPAddress = deviceModel.device.GetInfo().GetAddressIPv4();
 
-            // Create Conventional Beam Set
-            //CreateBeamSet();
-            //BindConnector();
-
             // Create PA Beam Set
-            //deviceModel.CreatPABeamSet();
-            //deviceModel.BindPAConnector();
-
-            // Create PA Focused Beam Set
-            //var delays = GetDelays();
-            //deviceModel.CreatPAFocusedBeamSet(probe, delays);
-            //deviceModel.BindPAConnector();
-
-            // Create PA Sscan Beam Set
-            var delays = GetSscanDelay();
-            deviceModel.CreatPASscanBeamSet(probe, delays);
-            deviceModel.BindPAConnector();
-            // correct sscan
-            CorrectSscan(delays);
+            deviceModel.CreatPABeamSet();
+            deviceModel.BindPAConnector();           
 
             InitAcquisition();
 
             // Init Ascan Settings
             AscanGain = deviceModel.beamSet.GetBeam(0).GetGain().ToString();
-            AscanLength = deviceModel.beamSet.GetBeam(0).GetAscanLength().ToString();
+            AscanLength = deviceModel.beamSet.GetBeam(0).GetAscanLength().ToString();            
 
-            // Plotting Ascan
-            //StartAscan();
-
-            // Plotting Bscan
-            //StartBscan();
-
-            // Plotting Sscan
-            StartSscan();
+            // Start plotting
+            StartPlotting();
         }
 
-        // take middle element's delay to correct sscan plotting
-        public void CorrectSscan(double[][] delays)
+        public void StartPlotting()
         {
-            for (uint i=0; i< delays.GetLength(0); i++)
-            {
-                if (probe.UsedElementsPerBeam % 2 == 1)
-                {
-                    uint mid = probe.UsedElementsPerBeam / 2 + 1;
-                    // set ascan start to the double of middle element's delay
-                    deviceModel.beamSet.GetBeam(i).SetAscanStart(delays[i][mid] * 2);
-                }
-                else
-                {
-                    uint mid = probe.UsedElementsPerBeam / 2;
-                    // set ascan start to the sum of the middle two elements' delays
-                    deviceModel.beamSet.GetBeam(i).SetAscanStart(delays[i][mid] + delays[i][mid+1]);
-                }
-                
-            }
-        }
+            deviceModel.acquisition.ApplyConfiguration();
+            deviceModel.acquisition.Start();
 
-        public void CreateBeamSet()
-        {
-            deviceModel.CreatBeamSet();
-            BeamSetName = deviceModel.beamSet.GetName();
-            Logging += "BeamSet is created!" + Environment.NewLine;
-        }
+            var taskConsumeData = new Task(() => deviceModel.ConsumeData());
+            taskConsumeData.Start();
 
-        public void BindConnector()
-        {
-            deviceModel.BindConnector();
-            Logging += "Connector is binded!" + Environment.NewLine;
-        }
+            var taskPlotting = new Task(() => Plotting());
+            taskPlotting.Start();
+        }      
 
         public void InitAcquisition()
         {
             deviceModel.InitiateAcquisition();
             Logging += "Init Acquisition!" + Environment.NewLine;
         }
-
-        public void CollectCycleData()
+        
+        public void PlotAscan(int[] data)
         {
-            int number = 10;
-
-            deviceModel.acquisition.ApplyConfiguration();
-            deviceModel.acquisition.Start();
-
-            for (int i=0; i<number; i++)
+            lineSeries.Points.Clear();
+            for (int i = 0; i < data.GetLength(0); i++)
             {
-                var cycleData = deviceModel.CollectCycleData();
-                Logging += "Cycle ID: " + cycleData.GetCycleId().ToString() + Environment.NewLine;
-            }
-
-            deviceModel.acquisition.Stop();
-        }
-
-        public void CollectAscanData()
-        {
-            deviceModel.acquisition.ApplyConfiguration();
-            deviceModel.acquisition.Start();
-
-            int[] ascanData = deviceModel.CollectAscanData();
-
-            for (int i=0; i<ascanData.GetLength(0); i++)
-            {
-                Logging += ascanData[i].ToString() + ",";
-            }
-
-            Logging += Environment.NewLine;
-
-            deviceModel.acquisition.Stop();
-        }
-
-        public void PlotAscan()
-        {
-            deviceModel.acquisition.ApplyConfiguration();
-            deviceModel.acquisition.Start();
-
-            int[] ascanData = deviceModel.CollectAscanData();
-
-            for (int i = 0; i < ascanData.GetLength(0); i++)
-            {
-                lineSeries.Points.Add(new DataPoint(i, ascanData[i]));
+                lineSeries.Points.Add(new DataPoint(i, data[i]));
             }
             plotModel.InvalidatePlot(true);
-            deviceModel.acquisition.Stop();
-        }
+        }        
 
-        public void PlottingAscan()
+        public void PlotCscan(int[][] data)
         {
-            int[] ascanData;
-            int plottingIndex = 0;
 
-            while (true)
-            {
-                try
-                {
-                    ascanData = deviceModel.CollectAscanData();
-                    if (ascanData.GetLength(0) < 1)
-                    { break; }
-
-                    lineSeries.Points.Clear();
-
-                    for (int i = 0; i < ascanData.GetLength(0); i++)
-                    {
-                        lineSeries.Points.Add(new DataPoint(i, ascanData[i]));
-                    }
-                    plotModel.InvalidatePlot(true);
-                    plottingIndex += 1;
-                    Logging = plottingIndex.ToString();
-                }
-                catch (Exception)
-                {
-
-                    //throw;
-                }
-            }
         }
 
-        public void PlottingBscan()
-        {
-            int[][] bscanData;
-            int plottingIndex = 0;
-
-            while (true)
-            {
-                try
-                {
-                    bscanData = deviceModel.CollectBscanData();
-                    if (bscanData.GetLength(0) < 1)
-                    { break; }
-
-                    plotData = new double[bscanData.GetLength(0), bscanData[0].GetLength(0)];
-
-                    for (int i=0; i< bscanData.GetLength(0); i++)
-                    {
-                        for (int j=0; j< bscanData[0].GetLength(0); j++)
-                        {
-                            plotData[i, j] = (double)bscanData[i][j];
-                        }
-                    }
-
-                    plotModel.InvalidatePlot(true);
-                    heatMapSeries.Data = plotData;
-
-                    plottingIndex += 1;
-                    Logging = plottingIndex.ToString();
-                }
-                catch (Exception)
-                {
-
-                    //throw;
-                }
-            }
-        }
-
-        public void PlottingSscan()
+        public void Plotting()
         {
             int[][] rawData;
             int plottingIndex = 0;
@@ -377,96 +148,21 @@ namespace FPXDemo.ViewModels
                 try
                 {
                     rawData = deviceModel.CollectBscanData();
-                    if (rawData.GetLength(0) < 1)
-                    { break; }
 
-                    // Get plot points
-                    var plotPoints = sscanGraph.GetPlotPoints();
+                    // Plot Ascan
+                    PlotAscan(rawData[0]); // plot Beam 0 Ascan
 
-                    plotData = new double[plotPoints.GetLength(0), plotPoints.GetLength(1)];
-
-                    // Assign plot value to each plot points
-                    for (int xIndex=0; xIndex< plotPoints.GetLength(0); xIndex++)
-                    {
-                        for (int yIndex=0; yIndex< plotPoints.GetLength(1); yIndex++)
-                        {
-                            // current plot point
-                            var p = plotPoints[xIndex, yIndex];
-                            // X / Y = Tan(angle)
-                            double angle = Math.Atan2(p.X, p.Y) * 180 / Math.PI;
-
-                            // if angle is not in range (start angle, end angle)
-                            // then assign this plot point value = 0
-                            if ((angle < sscanModel.StartAngle) || (angle > sscanModel.EndAngle))
-                            {
-                                plotData[xIndex, yIndex] = 0;
-                            }
-                            // if angle is in this range, then assgin it's value according to raw data
-                            else
-                            {
-                                double radius = Math.Sqrt(p.X * p.X + p.Y * p.Y);
-                                // find this plot point in which beam
-                                int rawXIndex = (int)Math.Round((angle - sscanModel.StartAngle) / sscanModel.AngleResolution);
-                                // find nearest Ascan value in this beam
-                                double velocity = 5800; // m/s
-                                int rawYIndex = (int)Math.Round((radius * 2e5) / velocity);
-                                plotData[xIndex, yIndex] = Math.Abs(rawData[rawXIndex][rawYIndex]);
-                            }
-                        }
-                    }
-                    plotModel.InvalidatePlot(true);
-                    heatMapSeries.Data = plotData;
+                    // Plot Cscan
+                    PlotCscan(rawData);
 
                     plottingIndex += 1;
                     Logging = plottingIndex.ToString();
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-
-                    //throw;
+                    MessageBox.Show(e.ToString());
                 }
             }
-        }
-
-        public void StartAscan()
-        {
-            deviceModel.acquisition.ApplyConfiguration();
-            deviceModel.acquisition.Start();
-
-            var taskConsumeData = new Task(() => deviceModel.ConsumeData());
-            taskConsumeData.Start();
-
-            var taskPlottingAscan = new Task(() => PlottingAscan());
-            taskPlottingAscan.Start();
-        }
-
-        public void StartBscan()
-        {
-            deviceModel.acquisition.ApplyConfiguration();
-            deviceModel.acquisition.Start();
-
-            var taskConsumeData = new Task(() => deviceModel.ConsumeData());
-            taskConsumeData.Start();
-
-            var taskPlottingBscan = new Task(() => PlottingBscan());
-            taskPlottingBscan.Start();
-        }
-
-        public void StartSscan()
-        {
-            deviceModel.acquisition.ApplyConfiguration();
-            deviceModel.acquisition.Start();
-
-            var taskConsumeData = new Task(() => deviceModel.ConsumeData());
-            taskConsumeData.Start();
-
-            var taskPlottingSscan = new Task(() => PlottingSscan());
-            taskPlottingSscan.Start();
-        }
-
-        public void StopAscan()
-        {
-            deviceModel.acquisition.Stop();
         }
 
         public string SerialNumber
@@ -546,6 +242,5 @@ namespace FPXDemo.ViewModels
                 NotifyOfPropertyChange(() => Logging);
             }
         }
-
     }
 }

@@ -92,7 +92,7 @@ namespace FPXDemo.ViewModels
             IPAddress = deviceModel.device.GetInfo().GetAddressIPv4();
 
             // Create PA Beam Set
-            deviceModel.CreatPABeamSet();
+            deviceModel.CreatPABeamSet(probe);
             deviceModel.BindPAConnector();           
 
             InitAcquisition();
@@ -147,7 +147,7 @@ namespace FPXDemo.ViewModels
             {
                 try
                 {
-                    rawData = deviceModel.CollectBscanData();
+                    rawData = deviceModel.CollectRawData();
 
                     // Plot Ascan
                     PlotAscan(rawData[0]); // plot Beam 0 Ascan

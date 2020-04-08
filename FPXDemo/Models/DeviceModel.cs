@@ -58,21 +58,21 @@ namespace FPXDemo.Models
             beamSet = beamSetFactory.CreateBeamSetConventional("Conventional");
         }
 
-        public void CreatPABeamSet()
+        public void CreatPABeamSet(ProbeModel probe)
         {
             IDeviceConfiguration deviceConfiguration = device.GetConfiguration();
             ultrasoundConfiguration = deviceConfiguration.GetUltrasoundConfiguration();
             digitizerTechnology = ultrasoundConfiguration.GetDigitizerTechnology(UltrasoundTechnology.PhasedArray);
             IBeamSetFactory beamSetFactory = digitizerTechnology.GetBeamSetFactory();
-            var beamFormations = GetBeamFormationCollection(beamSetFactory);
+            var beamFormations = GetBeamFormationCollection(beamSetFactory, probe);
             beamSet = beamSetFactory.CreateBeamSetPhasedArray("Phased Array", beamFormations);
         }
 
-        public IBeamFormationCollection GetBeamFormationCollection(IBeamSetFactory beamSetFactory)
+        public IBeamFormationCollection GetBeamFormationCollection(IBeamSetFactory beamSetFactory, ProbeModel probe)
         {
             var beamFormations = beamSetFactory.CreateBeamFormationCollection();
-            uint usedElementPerBeam = 8;
-            uint totalElements = 32;
+            uint usedElementPerBeam = probe.UsedElementsPerBeam;
+            uint totalElements = probe.TotalElements;
 
             for (uint beamIndex=0; beamIndex<totalElements-usedElementPerBeam+1; beamIndex++)
             {
@@ -263,7 +263,7 @@ namespace FPXDemo.Models
             return null;
         }
 
-        public int[][] CollectBscanData()
+        public int[][] CollectRawData()
         {
             if (acquisition == null)
             {
@@ -288,25 +288,7 @@ namespace FPXDemo.Models
             }
 
             return null;
-        }
-
-        //public void ConsumeData()
-        //{
-        //    try
-        //    {
-        //        var dataResult = acquisition.WaitForDataEx();
-        //        while (dataResult.status == IAcquisition.WaitForDataResultEx.Status.DataAvailable)
-        //        {
-        //            using (var cycleData = dataResult.cycleData)
-        //                dataResult = acquisition.WaitForDataEx();
-        //        }
-        //        dataResult.Dispose();
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        MessageBox.Show(e.ToString());
-        //    }
-        //}
+        }       
 
         public void ConsumeData()
         {

@@ -106,6 +106,7 @@
     <Compile Include="Models\AxisModel.cs" />
     <Compile Include="Models\DelayLawModel.cs" />
     <Compile Include="Models\DeviceModel.cs" />
+    <Compile Include="Models\GateModel.cs" />
     <Compile Include="Models\ProbeModel.cs" />
     <Compile Include="Models\SscanGraphModel.cs" />
     <Compile Include="Models\SscanModel.cs" />

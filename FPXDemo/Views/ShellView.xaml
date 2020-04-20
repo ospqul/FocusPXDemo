@@ -39,53 +39,32 @@
             <TextBox x:Name="SerialNumber" MinWidth="50"/>
             <Label Content="IP Address"/>
             <TextBox x:Name="IPAddress" MinWidth="50" />
-        </StackPanel>      
+        </StackPanel>     
         
-        <!-- Row 2: Create BeamSet --><!--
-        <Button x:Name="CreateBeamSet" Content="Create BeamSet"
-                Grid.Column="1" Grid.Row="2" Margin="5"/>
-        <StackPanel Orientation="Horizontal" Grid.Column="2" Grid.Row="2"
-                    Margin="5">
-            <Label Content="BeamSet Name"/>
-            <TextBox x:Name="BeamSetName" MinWidth="50"/>
-        </StackPanel>
-        
-        --><!-- Row 3: Bind Connector --><!--
-        <Button x:Name="BindConnector" Content="Bind Connector"
-                Grid.Column="1" Grid.Row="3" Margin="5"/>
-    
-        --><!-- Row 4: Acquisition --><!--
-        <Button x:Name="InitAcquisition" Content="InitAcquisition"
-                Grid.Column="1" Grid.Row="4" Margin="5"/>
-        <StackPanel Orientation="Horizontal" Grid.Column="2" Grid.Row="4"
-                    Margin="5">
-            <Button x:Name="CollectCycleData" Content="Collect CycleData"
-                    Margin="5,0"/>
-            <Button x:Name="CollectAscanData" Content="Collect Ascan Data"
-                    Margin="5,0"/>
-        </StackPanel>-->
-        
-        <!-- Row 5: Plot Ascan --><!--
-        <Button x:Name="PlotAscan" Content="Plot Ascan"
-                Grid.Column="1" Grid.Row="5" Margin="5"/>
-        <StackPanel Orientation="Horizontal" Grid.Column="2" Grid.Row="5"
-                    Margin="5">
-            <Button x:Name="StartAscan" Content="Start Ascan" Margin="5"/>
-            <Button x:Name="StopAscan" Content="Stop Ascan" Margin="5"/>
-        </StackPanel>-->
-        
-        <!-- Row 6: Ascan Settings -->
-        <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="6"
+        <!-- Row 2: Ascan Settings -->
+        <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="2"
                     Margin="5">
             <Label Content="Ascan Gain"/>
             <TextBox x:Name="AscanGain" MinWidth="50"/>
         </StackPanel>
-        <StackPanel Orientation="Horizontal" Grid.Column="2" Grid.Row="6"
+        <StackPanel Orientation="Horizontal" Grid.Column="2" Grid.Row="2"
                     Margin="5">
             <Label Content="Ascan Length" />
             <TextBox x:Name="AscanLength" MinWidth="50"/>
         </StackPanel>
 
+        <!-- Row 3: Gate Settings -->
+        <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.ColumnSpan="2"
+                    Grid.Row="3" Margin="5">
+            <Label Content="Gate"/>
+            <Label Content="Start"/>
+            <TextBox x:Name="GateStart" MinWidth="50"/>
+            <Label Content="Length"/>
+            <TextBox x:Name="GateLength" MinWidth="50"/>
+            <Label Content="Threshold"/>
+            <TextBox x:Name="GateThreshold" MinWidth="50"/>
+        </StackPanel>
+         
         <!-- Last Row: Logging -->
         <Border BorderThickness="1" BorderBrush="Black" MaxWidth="500"
                 Grid.Column="1" Grid.ColumnSpan="5" Grid.Row="7" Margin="10">

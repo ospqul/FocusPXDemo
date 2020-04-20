@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using FPXDemo.Models;
 using OxyPlot;
+using OxyPlot.Annotations;
 using OxyPlot.Axes;
 using OxyPlot.Series;
 using System;
@@ -14,12 +15,17 @@ namespace FPXDemo.ViewModels
 {
     class ShellViewModel : Screen
     {
+        // Ascan settings
         public DeviceModel deviceModel { get; set; }
         public PlotModel plotModel { get; set; }
-        public LineSeries lineSeries { get; set; }     
+        public LineSeries lineSeries { get; set; }
+        public ArrowAnnotation annotation { get; set; }
 
         // Probe
         public ProbeModel probe { get; set; }
+
+        // Gate 
+        public GateModel gate { get; set; }
 
         private string _serialNumber;
         private string _ipAddress;
@@ -42,8 +48,20 @@ namespace FPXDemo.ViewModels
                 Pitch = 1,
             };
 
+            // Init a gate
+            gate = new GateModel
+            {
+                Start = 10,
+                Length = 50,
+                Threshold = 20,
+            };
+            GateStart = gate.Start.ToString();
+            GateLength = gate.Length.ToString();
+            GateThreshold = gate.Threshold.ToString();
+
             // Init Ascan
             InitAscan();
+            PlotGate();
 
             // Init Cscan
             InitCscan();
@@ -78,6 +96,28 @@ namespace FPXDemo.ViewModels
                 StrokeThickness = 1.5,
             };
             plotModel.Series.Add(lineSeries);
+
+            // Add gate into Ascan Plot
+            annotation = new ArrowAnnotation
+            {
+                HeadLength = 0,
+                HeadWidth = 0,
+                Text = "Gate",
+                TextColor = OxyColors.Red,
+                StrokeThickness = 5,
+                Color = OxyColors.Red,
+            };
+            plotModel.Annotations.Add(annotation);
+        }
+
+        public void PlotGate()
+        {
+            if (annotation != null)
+            {
+                annotation.StartPoint = new DataPoint(gate.Start, gate.Threshold);
+                annotation.EndPoint = new DataPoint(gate.Start + gate.Length, gate.Threshold);
+                plotModel.InvalidatePlot(true);
+            }
         }
 
         public void InitCscan()
@@ -232,6 +272,59 @@ namespace FPXDemo.ViewModels
                 }
             }
         }
+
+        // Gate Settings UI
+        private string _gateStart;
+
+        public string GateStart
+        {
+            get { return _gateStart; }
+            set
+            {
+                _gateStart = value;
+                NotifyOfPropertyChange(() => GateStart);
+                if (double.TryParse(_gateStart, out double result))
+                {
+                    gate.Start = result;
+                    PlotGate();
+                }
+            }
+        }
+
+        private string _gateLength;
+
+        public string GateLength
+        {
+            get { return _gateLength; }
+            set
+            {
+                _gateLength = value;
+                NotifyOfPropertyChange(() => GateLength);
+                if (double.TryParse(_gateLength, out double result))
+                {
+                    gate.Length = result;
+                    PlotGate();
+                }
+            }
+        }
+
+        private string _gateThreshold;
+
+        public string GateThreshold
+        {
+            get { return _gateThreshold; }
+            set
+            {
+                _gateThreshold = value;
+                NotifyOfPropertyChange(() => GateThreshold);
+                if (double.TryParse(_gateThreshold, out double result))
+                {
+                    gate.Threshold = result;
+                    PlotGate();
+                }
+            }
+        }
+
 
         public string Logging
         {

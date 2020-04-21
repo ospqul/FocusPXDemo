@@ -51,6 +51,8 @@
                     Margin="5">
             <Label Content="Ascan Length" />
             <TextBox x:Name="AscanLength" MinWidth="50"/>
+            <Label Content="Beam Index"/>
+            <TextBox x:Name="BeamIndex" MinWidth="50"/>
         </StackPanel>
 
         <!-- Row 3: Gate Settings -->
@@ -79,7 +81,8 @@
             <oxy:PlotView Model="{Binding plotModel}" Margin="5" Height="300"/>
             
             <!-- Cscan -->
-            <Image Source="{Binding heatmapGraph}" Margin="5" Height="200"/>
+            <Image Source="{Binding heatmapGraph}" Margin="5" Height="200"
+                   Stretch="Fill"/>
 
         </StackPanel>
         

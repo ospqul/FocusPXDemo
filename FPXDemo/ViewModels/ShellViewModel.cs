@@ -142,7 +142,7 @@ namespace FPXDemo.ViewModels
         {
             cscanModel = new CscanModel
             {
-                Width = 400,
+                Width = 800,
                 Height = (int)(probe.TotalElements - probe.UsedElementsPerBeam + 1),
             };
 
@@ -232,7 +232,7 @@ namespace FPXDemo.ViewModels
                     rawData = deviceModel.CollectRawData();
 
                     // Plot Ascan
-                    PlotAscan(rawData[0]); // plot Beam 0 Ascan
+                    PlotAscan(rawData[BeamIndex]); // plot selected Beam
 
                     // Plot Cscan
                     PlotCscan(rawData, plottingIndex);
@@ -322,6 +322,19 @@ namespace FPXDemo.ViewModels
                 }
             }
         }
+
+        private int _beamIndex = 0;
+
+        public int BeamIndex
+        {
+            get { return _beamIndex; }
+            set
+            {
+                _beamIndex = value;
+                NotifyOfPropertyChange(() => BeamIndex);
+            }
+        }
+
 
         // Gate Settings UI
         private string _gateStart;

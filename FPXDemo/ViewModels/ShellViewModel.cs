@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using FPXDemo.Models;
+using Heatmap;
 using OxyPlot;
 using OxyPlot.Annotations;
 using OxyPlot.Axes;
@@ -10,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media.Imaging;
 
 namespace FPXDemo.ViewModels
 {
@@ -20,6 +22,22 @@ namespace FPXDemo.ViewModels
         public PlotModel plotModel { get; set; }
         public LineSeries lineSeries { get; set; }
         public ArrowAnnotation annotation { get; set; }
+
+        // Cscan Settings
+        public CscanModel cscanModel { get; set; }
+        public HeatmapModel heatmapModel { get; set; }
+        private BitmapSource _heatmapGraph;
+
+        public BitmapSource heatmapGraph
+        {
+            get { return _heatmapGraph; }
+            set
+            {
+                _heatmapGraph = value;
+                NotifyOfPropertyChange(() => heatmapGraph);
+            }
+        }
+
 
         // Probe
         public ProbeModel probe { get; set; }
@@ -42,8 +60,8 @@ namespace FPXDemo.ViewModels
             // Init a probe
             probe = new ProbeModel
             {
-                TotalElements = 64, // total 32 elements
-                UsedElementsPerBeam = 1, // use all 32 elements
+                TotalElements = 64, 
+                UsedElementsPerBeam = 4,
                 Frequency = 5,
                 Pitch = 1,
             };
@@ -122,7 +140,15 @@ namespace FPXDemo.ViewModels
 
         public void InitCscan()
         {
+            cscanModel = new CscanModel
+            {
+                Width = 400,
+                Height = (int)(probe.TotalElements - probe.UsedElementsPerBeam + 1),
+            };
 
+            heatmapModel = new HeatmapModel(cscanModel.Width, cscanModel.Height);
+
+            heatmapGraph = heatmapModel.BitmapToImageSource();
         }     
 
         public async void ConnectDevice()
@@ -173,8 +199,24 @@ namespace FPXDemo.ViewModels
             plotModel.InvalidatePlot(true);
         }        
 
-        public void PlotCscan(int[][] data)
+        public void PlotCscan(int[][] data, int xPos)
         {
+            int colorNumber = heatmapModel.colorList.Count();
+
+            for (int i=0; i<data.GetLength(0); i++)
+            {
+                // Get cscan value with gate
+                var loc = DetectSignal.CrossGateLocation(data[i], gate);
+
+                // Get cscan paint color
+                var color = (loc - gate.Start) * colorNumber / gate.Length;
+
+                // Paint
+                heatmapModel.PaintHeatMapPoint(new HeatmapPoint(xPos, i, (int)color));
+            }
+
+            // update cscan plotting
+            heatmapGraph = heatmapModel.BitmapToImageSource();
 
         }
 
@@ -193,9 +235,17 @@ namespace FPXDemo.ViewModels
                     PlotAscan(rawData[0]); // plot Beam 0 Ascan
 
                     // Plot Cscan
-                    PlotCscan(rawData);
+                    PlotCscan(rawData, plottingIndex);
 
-                    plottingIndex += 1;
+                    // replot when cscan ends
+                    if (plottingIndex > cscanModel.Width)
+                    {
+                        plottingIndex = 0;
+                    }
+                    else
+                    {
+                        plottingIndex += 1;
+                    }
                     Logging = plottingIndex.ToString();
                 }
                 catch (Exception e)

@@ -74,8 +74,15 @@
         </Border>
         
         <!-- Plotting Area -->
-        <oxy:PlotView Grid.Column="6" Grid.Row="1" Grid.RowSpan="7"
-                      Model="{Binding plotModel}" Margin="10"/>
+        <StackPanel Grid.Column="6" Grid.Row="1" Grid.RowSpan="7">
+            <!-- Ascan -->
+            <oxy:PlotView Model="{Binding plotModel}" Margin="5" Height="300"/>
+            
+            <!-- Cscan -->
+            <Image Source="{Binding heatmapGraph}" Margin="5" Height="200"/>
+
+        </StackPanel>
+        
 
     </Grid>
 </Window>

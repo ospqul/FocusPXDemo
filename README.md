@@ -25,6 +25,15 @@ $ git branch
   7_Connect_Phased_Array_Probe
   8_Plot_Bscan
   9_Calculate_focused_beam_delays
+  10_Plot_and_Compoare_Focused_and_Unfocused_Bscan
+  11_Calculate_Sscan_Element_delay
+  12_Plot_Sscan
+  13_Plot_Sscan_without_correction
+  14_Plot_Sscan_after_correction
+  15_Cscan_Part1_Clean_up_code_and_Plot_Ascan
+  16_Cscan_Part2_Add_Gate_To_Ascan
+  17_Cscan_Part3_Plot_Cscan
+  18_Cscan_Part4_Do_a_real_Cscan
   
 $ git checkout 1_Set_Environment
 Switched to branch '1_Set_Environment'

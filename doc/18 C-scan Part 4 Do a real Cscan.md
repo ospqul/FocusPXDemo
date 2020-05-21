@@ -4,6 +4,8 @@
 
 We are using probe 5L64-NW1 to test. 
 
+![5L64-NW1](https://github.com/ospqul/FocusPXDemo/blob/master/resources/5L64-NW1.PNG)
+
 Probe details can be found in [https://www.olympus-ims.com/en/probes/pa/near-wall/](https://www.olympus-ims.com/en/probes/pa/near-wall/).
 
 ```c#
@@ -21,6 +23,8 @@ probe = new ProbeModel
 #### 18.2 Corrosion Test Piece
 
 This test piece is made of Plexiglass and is engraved to different depth from behind, so that C-scan image will present different colors.
+
+![TestPiece](https://github.com/ospqul/FocusPXDemo/blob/master/resources/CorrosionTestPiece.jpg)
 
 #### 18.3 Beam Index
 
@@ -60,6 +64,8 @@ public void Plotting()
 #### 18.4 Run Program
 
 When the program is running, we have to adjust the gate settings according to the signal. In this example, we set Gate `Start`to 100, Gate `Length` to 770 and Gate `Threshold `to 30.
+
+![](https://github.com/ospqul/FocusPXDemo/blob/master/resources/RealCscan.PNG)
 
 #### 18.5 Source Code
 

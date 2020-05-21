@@ -181,6 +181,8 @@ We use a 32-element probe to test, and a test block with an indication located a
 
 When moving the probe over indication, you could see the indication moves from top to bottom in the C-scan image. Next section will use a corrosion test piece to demonstrate a good example of corrosion inspection.
 
+![CscanUI](https://github.com/ospqul/FocusPXDemo/blob/master/resources/PlotCscanUI.PNG)
+
 #### 17.7 Source Code
 
 Run `git checkout 17_Cscan_Part3_Plot_Cscan` to get source code for this section.

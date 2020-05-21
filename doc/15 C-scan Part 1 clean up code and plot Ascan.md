@@ -12,6 +12,8 @@ See [https://www.nde-ed.org/EducationResources/CommunityCollege/Ultrasonics/Equi
 
 Basically, in order to plot a C-scan image, we need to acquire data from Foucs PX, and apply a **Gate** on A-scan to get C-scan values.
 
+![Cscan Diagram](https://github.com/ospqul/FocusPXDemo/blob/master/resources/CscanDiagram.PNG)
+
 We will discuss how to implement a customized gate in next section.
 
 #### 15.2 Prepare code for C-scan Plotting
@@ -19,7 +21,7 @@ We will discuss how to implement a customized gate in next section.
 Before we try to plot C-scan, let's 
 
 1. remove unnecessary codes/methods/functions;
-2. plot A-scan (refer to [5 Plotting Ascan in real time](https://github.com/ospqul/FocusPXDemo/blob/master/doc/5%20Plotting%20Ascan%20in%20real%20time.md)).
+2. plot A-scan (please refer to [5 Plotting Ascan in real time](https://github.com/ospqul/FocusPXDemo/blob/master/doc/5%20Plotting%20Ascan%20in%20real%20time.md)).
 
 #### 15.3 Source Code
 

@@ -6,6 +6,8 @@ There are different kinds of gate, and different gates are suitable for differen
 
 This section will implement a gate to measure TOF(time of flight) for a corrosion inspection project.
 
+![Ascan Gate](https://github.com/ospqul/FocusPXDemo/blob/master/resources/CscanGate.PNG)
+
 #### 16.2 Gate Class
 
 We need 3 properties to describe a gate:

@@ -8,6 +8,8 @@ How to paint pixel by pixel in .Net WPF is not the main purpose of this training
 
 Loop data from gate starting point till end, if data value is about threshold, return its location.
 
+![Gate](https://github.com/ospqul/FocusPXDemo/blob/master/resources/CscanGate.PNG)
+
 ```c#
 // DetectSignal.cs
 
@@ -174,6 +176,8 @@ public void Plotting()
 #### 17.8 Plot C-scan
 
 We use a 32-element probe to test, and a test block with an indication located at 17mm.
+
+![PlotCscan](https://github.com/ospqul/FocusPXDemo/blob/master/resources/PlotCscan.PNG)
 
 When moving the probe over indication, you could see the indication moves from top to bottom in the C-scan image. Next section will use a corrosion test piece to demonstrate a good example of corrosion inspection.
 

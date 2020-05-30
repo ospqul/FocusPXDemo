@@ -66,7 +66,7 @@ public void CreatPASscanBeamSet(ProbeModel probe, double[][] elementDelays)
 }
 ```
 
-#### 10.3 Make change in ShellViewModel
+#### 12.3 Make change in ShellViewModel
 
 1. Make `probe` and `sscanModel` public property in `ShellViewModel` class.
 
@@ -143,6 +143,6 @@ public async void ConnectDevice()
 
 ![](https://github.com/ospqul/FocusPXDemo/blob/master/resources/Plot%20Sscan%20Raw%20data.PNG)
 
-#### 10.4 Source Code
+#### 12.4 Source Code
 
 Run `git checkout 12_Plot_Sscan` to get source code for this section.

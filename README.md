@@ -1,3 +1,6 @@
+**KINDLY NOTE THAT THIS IS DEMO PROJECT ONLY FOR SOFTWARE ENGINEER WITHOUT NDT BACKGROUND.
+PLEASE DO NOT USE IT FOR PRODUCTION.**
+
 # OpenView SDK Tutorial (C#)
 
 OpenView SDK is designed to help create custom applications for non-destructive inspections of industrial and commercial materials.
